@@ -1,19 +1,27 @@
-package com.chandni.musicvideo;
+package com.chandni.musicvideowithcontrollerevents;
 
 import javax.sound.midi.*;
 
-public class MiniMusicPlayer1 {
-    public static void main(String[] args) throws InvalidMidiDataException {
+public class MiniMusicPlayer2 implements ControllerEventListener {
+    public static void main(String[] args) {
+        final MiniMusicPlayer2 miniMusicPlayer2 = new MiniMusicPlayer2();
+        miniMusicPlayer2.go();
+    }
 
+    private void go() {
         try {
             final Sequencer sequencer = MidiSystem.getSequencer();
             sequencer.open();
 
+            int[] eventsIWant = {127};
+            sequencer.addControllerEventListener(this, eventsIWant);
+
             final Sequence sequence = new Sequence(Sequence.PPQ, 4);
             final Track track = sequence.createTrack();
 
-            for (int i = 5; i < 61; i+= 4) {
+            for (int i = 5; i < 60; i += 4) {
                 track.add(makeEvent(144, 1, i, 100, i));
+                track.add(makeEvent(176, 1, 127, 0, i));
                 track.add(makeEvent(128, 1, i, 100, i + 2));
             }
 
@@ -22,7 +30,14 @@ public class MiniMusicPlayer1 {
             sequencer.start();
         } catch (MidiUnavailableException e) {
             e.printStackTrace();
+        } catch (InvalidMidiDataException e) {
+            e.printStackTrace();
         }
+    }
+
+    @Override
+    public void controlChange(ShortMessage event) {
+        System.out.println("la");
     }
 
     public static MidiEvent makeEvent(int command, int channel, int data1, int data2, long tick) {
